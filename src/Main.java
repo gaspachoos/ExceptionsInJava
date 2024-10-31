@@ -1,3 +1,7 @@
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.FileAlreadyExistsException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -17,6 +21,8 @@ public class Main {
         checkValidPhoneNumber(dataArray);
         checkValidDate(dataArray);
         checkFullNameValidation(dataArray);
+
+
     }
 
     public static void checkLengthOfData(String[] data) throws DataLengthError {
@@ -75,21 +81,51 @@ public class Main {
         }
     }
     public static void checkFullNameValidation(String[] data) throws FullNameError {
-        String[] fullNameArray = new String[2];
+        StringBuilder fullNameArray = new StringBuilder(" ");
+
         int j = 0;
         for (int i = 0; i < data.length; i++) {
-            if(data[i].length() > 1 |  Character.isUpperCase(data[i].charAt(0))){
-                fullNameArray[j] = data[i];
+            if(data[i].length() > 1 & Character.isUpperCase(data[i].charAt(0))){
+                fullNameArray.append(data[i]);
                 j++;
-                if(j == 2){
+                if(j == 3){
+                    createFile(fullNameArray.toString());
+                    dataWriter(fullNameArray.toString(),data);
                     break;
                 }
 
             }
         }
-        if (fullNameArray.length != 2){
+        if (j != 3){
             throw new FullNameError();
         }
+
+    }
+    public static void createFile(String path) {
+        try {
+            File file = new File(path);
+            if (file.createNewFile()) {
+                System.out.println("Файл создан: " + file.getName());
+            } else {
+                throw new FileAlreadyExistsException("Файл уже существует.");
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Ошибка записи в файл");
+        }
+
+    }
+    public static void dataWriter(String path,String[] data){
+
+        try (FileWriter writer = new FileWriter(path)) {
+            for (String line : data) {
+                writer.write(line + " ");
+            }
+            System.out.println("Данные успешно записаны в файл: " + path);
+        } catch (IOException e) {
+            System.out.println("Произошла ошибка при записи данных в файл.");
+            e.printStackTrace();
+        }
+
 
     }
 
